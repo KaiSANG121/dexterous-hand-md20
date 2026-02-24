@@ -19,8 +19,13 @@ This project implements a lightweight 5-finger hand controller:
 This GIF shows a **pinch grasp & safe release** using the LV-TTL thumb+index pair.  
 After a successful pinch, press **SYNC** to let the 3 PWM fingers **wrap and increase friction** (full-hand grasp).
 
-- Full grasp test videos (recommended): **TODO: paste link (Bilibili/YouTube/Drive)**
+## Video Demos
 
+- **Overview (hardware + control modes)**: https://youtube.com/shorts/v7Af31TAydM?feature=share
+- **Manipulation: Bottle cap loosening (strategy iteration)**: https://youtu.be/Ag10vxxGfRg
+- **Small object grasp: Thumbtack with fine adjustment**: https://youtu.be/Tc2J1AXXHpU
+
+See full list: [media/videos.md](media/videos.md)
 ---
 
 ## System Overview
