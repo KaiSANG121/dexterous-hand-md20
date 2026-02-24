@@ -179,4 +179,5 @@ It should include:
 ---
 
 ## License
-TODO: choose a license (MIT recommended for code; hardware can be separate if needed)
+- Code: Licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- Hardware: Licensed under the [CERN Open Hardware License](https://www.ohwr.org/projects/cernohl).
