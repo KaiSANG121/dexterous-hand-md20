@@ -1,0 +1,12 @@
+task_type,task_name,object,object_type,material_or_compliance,mode,trials,success,success_rate,notes
+grasp,pinch_grasp,pingpong_ball,medium,rigid,pinch,30,30,1,load~35-55; stable pinch & clean release
+grasp,fullhand_grasp,rubiks_cube,medium,rigid,fullhand,30,30,1,SYNC wrap improves friction; stable hold
+grasp,fullhand_grasp,nylon_rope,flexible,compliant,fullhand,30,30,1,wrap significantly improves stability on deformable object
+grasp,fullhand_grasp,bagged_milk,medium,compliant,fullhand,30,29,0.966666667,requires gentle force; load threshold helps avoid over-squeeze
+grasp,fullhand_grasp,glasses_cloth,thin_fabric,highly_compliant,fullhand,30,30,1,grasp edges; wrap prevents slip
+grasp,fullhand_grasp,water_bottle_half_full,large,rigid+liquid,fullhand,30,26,0.866666667,heavier payload; stable hold with wrap
+,,,,,,,,,
+grasp,fine_object_grasp,thumbtack,small,rigid,fine_adjust,30,11,0.366666667,high pose precision needed; common failure: slip/misalignment
+,,,,,,,,,
+manipulation,peg_insertion,card_pick_and_insert,card,semi_rigid,pinch+fine_adjust,50,46,0.92,pick card from table -> align -> insert; success depends on alignment
+manipulation,cap_unscrewing,loosen_bottle_cap,bottle_cap,rigid,pinch+wrap,50,19,0.38,requires torsion + stable normal force; wrap improves anti-slip
