@@ -25,7 +25,7 @@ After a successful pinch, press **SYNC** to let the 3 PWM fingers **wrap and inc
 - **Manipulation: Bottle cap loosening (strategy iteration)**: https://youtu.be/Ag10vxxGfRg
 - **Small object grasp: Thumbtack with fine adjustment**: https://youtu.be/Tc2J1AXXHpU
 
-See full list: [media/videos.md](media/videos.md)
+- See full list: [media/videos.md](media/videos.md)
 ---
 
 ## System Overview
@@ -85,6 +85,8 @@ See full list: [media/videos.md](media/videos.md)
 | PWM #2 | D6 |
 | PWM #3 | D10 |
 
+- Mapping: PWM#1 = Middle, PWM#2 = Ring, PWM#3 = Pinky
+
 ### Buttons (INPUT_PULLUP)
 - Released = HIGH, Pressed = LOW
 - Wire each button between the pin and **GND** (no external resistor required)
@@ -136,7 +138,7 @@ These are defined at the top of `code.ino`.
 
 ## Calibration (recommended)
 
-See: `docs/calibration.md` (TODO: add this file)
+See: [docs/calibration.md](docs/calibration.md)
 
 It should include:
 - How to determine `kPosMin/kPosMax` safely
@@ -147,12 +149,11 @@ It should include:
 
 ## Results (Grasp Tests)
 
-- Raw log: `results/grasp_tests.csv` (TODO: add)
-- Summary: `results/grasp_summary.md` (optional)
+- Raw log: [results/grasp_tests.csv](results/grasp_tests.csv)
+- Summary: [results/grasp_summary.md](results/grasp_summary.md)
 
-Suggested columns:
-`object, material, size, mode(pinch/fullhand), trials, success, notes`
-
+- Headline: medium/large objects ~100% success; small objects (thumbtack) ~30% success (requires fine adjustment).
+- Manipulation demos: bottle-cap loosening + card insertion (see videos).
 ---
 
 ## Repository Structure
