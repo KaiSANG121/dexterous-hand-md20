@@ -1,183 +1,250 @@
-# Dexterous Hand (Arduino Mega2560)
-**2× LV-TTL (MD20) pinch + 3× PWM follower fingers + button control + fine adjust**
+# Dexterous Hand Control System for Precision Grasping
 
-This project implements a lightweight 5-finger hand controller:
-- **Thumb + Index (LV-TTL / MD20)**: pinch grasp with **load-threshold contact stop**
-- **3 PWM fingers**: follow index motor position to convert pinch → full-hand wrap (more friction, higher success)
-- **Fine adjustment**: precise in/out micro-moves for small objects
-- **Buttons over Bluetooth**: lower latency and more reliable control (plus serial fallback)
+A robotics project focused on **precision grasping**, **embedded control**, and **hardware-software integration** using an Arduino-based dexterous hand prototype.
 
-**Board:** Arduino Mega2560 Pro (works with Mega2560)  
-**Author:** Kaiyang Deng
+This project presents a dexterous hand control system designed to improve grasp stability for objects of different sizes through a staged control strategy. The system combines a **pinch-first grasping mechanism**, **position-synchronized follower fingers**, and a **fine adjustment mode** for small-object manipulation.
+
+The thumb and index finger are driven by **LV-TTL motors** to perform the primary pinch action, while the remaining three fingers are driven by **PWM servos** to provide follow-up wrapping support. To improve reliability and reduce latency during prototyping, a **button-based control interface** was adopted instead of Bluetooth communication.
+
+My main contributions include **control architecture design**, **Arduino firmware implementation**, **parameter tuning**, **hardware-software integration**, and **grasp performance testing**.
 
 ---
 
-## Demo
+## Project Highlights
 
-![demo](media/gifs/demo.gif)
+- **Pinch-first grasping strategy** for initial object capture
+- **Load-threshold stop logic** for safer and more stable contact
+- **Position-synchronized follower fingers** for coordinated wrapping
+- **Fine adjustment mode** for small-object grasping
+- **Low-latency button-based control** for reliable prototyping
+- **Integrated embedded control and robotic hardware implementation**
 
-This GIF shows a **pinch grasp & safe release** using the LV-TTL thumb+index pair.  
-After a successful pinch, press **SYNC** to let the 3 PWM fingers **wrap and increase friction** (full-hand grasp).
+---
 
-## Video Demos
+## Motivation
 
-- **Overview (hardware + control modes)**: https://youtube.com/shorts/v7Af31TAydM?feature=share
-- **Manipulation: Bottle cap loosening (strategy iteration)**: https://youtu.be/Ag10vxxGfRg
-- **Small object grasp: Thumbtack with fine adjustment**: https://youtu.be/Tc2J1AXXHpU
+Dexterous robotic grasping requires both precise initial contact and stable follow-up wrapping. In low-cost prototypes, simple open-loop control often leads to unstable grasps, delayed response, or poor performance on small targets.
 
-- See full list: [media/videos.md](media/videos.md)
+This project explores a lightweight and practical control solution that balances:
+
+1. **stable initial pinch contact**,
+2. **coordinated finger wrapping**,
+3. **limited fine adjustment for small or difficult objects**.
+
+The goal was not only to make the hand move, but to design a control strategy that is **interpretable**, **tunable**, and **effective in real hardware tests**.
+
+---
+
+## My Contributions
+
+I was primarily responsible for the following aspects of the project:
+
+- designed the overall control architecture of the dexterous hand,
+- implemented the Arduino-based control firmware,
+- integrated LV-TTL motor control and PWM servo coordination,
+- designed the button-based interaction logic for grasp control,
+- tuned parameters such as motion limits, load thresholds, and fine adjustment step size,
+- conducted grasp testing and organized project documentation, videos, and results.
+
 ---
 
 ## System Overview
 
-### Control Strategy (Why this design)
-1. **Pinch (thumb + index)**: close both LV-TTL motors toward `kPosMax`  
-2. **Contact detection**: stop each side when `load > kLoadThreshold` (torque/load proxy from MD20)  
-3. **Full-hand wrap (SYNC)**: map index (Motor2) position ratio → PWM pulses → 3 fingers follow and stabilize grasp  
-4. **Fine adjust**: quick coarse move + fine in/out steps for small objects
-5. **Buttons**: reduce wireless latency and simplify field use (one button = one function)
+The system is built around an **Arduino controller** and consists of two main actuation groups:
+
+- **Pinch fingers:** thumb and index finger driven by LV-TTL motors for initial object capture
+- **Follower fingers:** three PWM-driven fingers for synchronized wrapping after pinch contact
+
+The system uses a **button-based interface** to trigger grasping, opening, and fine adjustment actions. This design was chosen to reduce control latency and improve repeatability during hardware testing.
+
+### Hardware Components
+
+- Arduino controller
+- 2 × LV-TTL motors
+- 3 × PWM servos
+- push buttons for user input
+- power supply and wiring interface
 
 ---
 
-## Quick Start (60 seconds)
+## Control Strategy
 
-### 1) Flash firmware
-1. Open `firmware/arduino/code/dexterous_hand_controller.ino` with Arduino IDE
-2. Select board: **Arduino Mega or Mega 2560**
-3. Upload
-4. (Optional) Open Serial Monitor @ **115200**
+The control logic consists of four main stages.
 
-### 2) Use buttons (recommended)
-- **OPEN (D40)**: open gripper to `kPosMin`
-- **GRIP (D42)**: close until `load > kLoadThreshold` (auto-stop on contact)
-- **SYNC (D22)**: PWM fingers follow **Motor2 (index)** position
-- **STOP (D20)**: emergency stop (hold current pose)
-- Fine adjust:
-  - **M1 (thumb):** IN D25 / OUT D27
-  - **M2 (index):** IN D29 / OUT D31
+### 1. Open State
 
-### 3) Serial fallback commands (USB Serial @115200)
-| Key | Action |
+The hand remains open and ready for a new grasp.
+
+### 2. Pinch Phase
+
+The thumb and index finger move toward each other until contact is detected through a **load-threshold condition**.
+
+### 3. Wrap Phase
+
+After pinch contact, the remaining three fingers move according to a **position-synchronized mapping strategy**, improving overall grasp stability.
+
+### 4. Fine Adjustment Phase
+
+For small or difficult objects, an additional **fine adjustment step** is used to slightly refine finger position and improve grasp success.
+
+This staged strategy separates **initial capture** from **grasp stabilization**, making the system easier to tune and easier to analyze during testing.
+
+---
+
+## Design Trade-off: Buttons vs Bluetooth
+
+Although Bluetooth control offers greater flexibility, it introduced additional latency and reduced repeatability during early-stage hardware testing. Since this project focused on **grasp reliability** and **rapid prototyping**, a button-based interface was chosen as a more stable and lower-latency solution.
+
+This reflects an important engineering trade-off:
+
+- sacrificing some communication convenience,
+- in order to improve robustness and repeatability during prototype validation.
+
+---
+
+## Wiring and Pin Map
+
+Please update this section according to your final hardware configuration.
+
+| Module | Connection |
 |---|---|
-| `1` | OPEN |
-| `2` | GRIP (stop on load threshold) |
-| `3` | STOP |
-| `4` | SYNC (PWM follow Motor2) |
+| LV-TTL Motor 1 | Thumb / pinch finger |
+| LV-TTL Motor 2 | Index / pinch finger |
+| PWM Servo 1 | Follower finger 1 |
+| PWM Servo 2 | Follower finger 2 |
+| PWM Servo 3 | Follower finger 3 |
+| Button A | Grasp trigger |
+| Button B | Open / release |
+| Button C | Fine adjustment |
+
+Detailed wiring notes can be found in the `hardware/` and `docs/` folders.
 
 ---
 
-## Wiring & Pin Map
+## Key Parameters
 
-### Serial buses (Mega2560)
-| Function | Port | Pins | Notes |
-|---|---|---|---|
-| Debug | Serial | TX0/RX0 | 115200 |
-| LV-TTL Motor1 (thumb) | Serial1 | TX1=18, RX1=19 | MD20 bus #1 |
-| LV-TTL Motor2 (index) | Serial2 | TX2=16, RX2=17 | MD20 bus #2 |
+The system behavior is mainly affected by the following parameters:
 
-> Note: both motor IDs are `0x01` because motors are on **separate UART buses**.  
-> If you put motors on the **same bus**, IDs must be unique.
+- **motion limits** for pinch fingers
+- **load threshold** for contact detection
+- **position mapping** between pinch motor and follower fingers
+- **fine adjustment step size**
+- **initial open position calibration**
 
-### PWM motors
-| PWM Motor | Arduino Pin |
-|---|---|
-| PWM #1 | D2 |
-| PWM #2 | D6 |
-| PWM #3 | D10 |
+These parameters were tuned empirically through repeated hardware testing to balance **grasp stability**, **responsiveness**, and **safe movement range**.
 
-- Mapping: PWM#1 = Middle, PWM#2 = Ring, PWM#3 = Pinky
-
-### Buttons (INPUT_PULLUP)
-- Released = HIGH, Pressed = LOW
-- Wire each button between the pin and **GND** (no external resistor required)
-
-| Function | Pin |
-|---|---:|
-| OPEN | D40 |
-| GRIP | D42 |
-| STOP | D20 |
-| SYNC | D22 |
-| Fine IN M1 | D25 |
-| Fine OUT M1 | D27 |
-| Fine IN M2 | D29 |
-| Fine OUT M2 | D31 |
+See `docs/calibration.md` for calibration notes.
 
 ---
 
-## Key Parameters (What they mean & how to tune)
+## Experimental Results
 
-These are defined at the top of `dexterous_hand_controller.ino`.
+The prototype was tested on objects of different sizes and grasping difficulty.
 
-### LV-TTL travel limits
-- `kPosMin = 80`, `kPosMax = 320`  
-  Safe open/close endpoints (avoid hard mechanical stops).  
-  **Tune:** adjust so fingers never hit hard stops under load.
+### Main Observations
 
-### Load-threshold grasping
-- `kLoadThreshold = 40`  
-  When closing, if `load > threshold`, that side is considered “in contact” and stops.  
-  **Tune method:** record load while empty-closing vs grasping typical objects; set threshold with margin.
+- medium and large objects could be grasped with high stability,
+- small objects were more sensitive to alignment and finger position,
+- the fine adjustment mode improved grasp feasibility for small targets,
+- synchronized follower fingers improved wrapping support after the initial pinch.
 
-### Monitoring
-- `kMonitorIntervalMs = 100`  
-  Read pos/load every 100ms.  
-  **Tune:** smaller = more responsive, but more serial traffic.
+### Example Result Summary
 
-### PWM follower calibration
-- `kPwmPulseAtPosMin = {1080, 680, 680}`  
-- `kPwmPulseAtPosMax = {1300, 1060, 1120}`  
-  Linear mapping from Motor2 position ratio → PWM pulse width (µs).  
-  **Tune:** align follower fingers at pos=min/max, record pulse widths.
+| Object Type | Grasp Mode | Result |
+|---|---|---|
+| Medium cylindrical object | Pinch + Sync | Stable grasp |
+| Large object | Pinch + Sync | Stable grasp |
+| Small object | Pinch + Sync + Fine Adjust | Partially successful |
+| Thin / difficult object | Pinch + Sync + Fine Adjust | Challenging |
 
-### Fine adjustment
-- `kFineStep = 40`, `kFineFastRegionEnd = 280`  
-  Coarse-to-fine adjustment for small objects.  
-  **Tune:** smaller step = finer but slower; larger = faster but may overshoot.
+More detailed logs can be found in the `results/` folder.
 
 ---
 
-## Calibration (recommended)
+## Suggested Future Experimental Upgrade
 
-See: [docs/calibration.md](docs/calibration.md)
+To strengthen this project as a research-oriented portfolio piece, future experiments can include:
 
-It should include:
-- How to determine `kPosMin/kPosMax` safely
-- How to select `kLoadThreshold` based on observed load values
-- How to calibrate PWM pulses at endpoints
+- **grasp success rate comparison** across object categories,
+- **ablation study**:
+  - pinch only,
+  - pinch + sync,
+  - pinch + sync + fine adjust,
+- **response time measurement** for contact stop and adjustment,
+- **failure case analysis** for small, thin, and low-friction objects.
 
 ---
 
-## Results (Grasp Tests)
+## Limitations and Future Work
 
-- Raw log: [results/grasp_tests.csv](results/grasp_tests.csv)
-- Summary: [results/grasp_summary.md](results/grasp_summary.md)
+While the current prototype demonstrates stable grasping for medium and large objects, several limitations remain:
 
-- Headline: medium/large objects ~100% success; small objects (thumbtack) ~30% success (requires fine adjustment).
-- Manipulation demos: bottle-cap loosening + card insertion (see videos).
+- small, thin, or low-friction objects are still difficult to grasp reliably,
+- the current system relies on threshold-based contact handling rather than richer tactile sensing,
+- follower fingers improve grasp wrapping but do not yet adapt independently to object geometry,
+- the overall control strategy is still relatively simple and does not include full closed-loop grasp optimization.
+
+Possible future improvements include:
+
+- adding tactile or force sensing,
+- improving closed-loop coordination across all fingers,
+- introducing object-specific grasp planning,
+- comparing multiple control strategies through systematic experiments.
+
 ---
 
 ## Repository Structure
 
-- `firmware/` Arduino code
-- `hardware/`
-  - `cad/` STEP/DWG (tracked by Git LFS)
-  - `bom/` BOM.xlsx
-- `media/` demo GIF / photos
-- `docs/` wiring + calibration guides
-- `results/` grasp benchmarks
+```text
+dexterous-hand-md20/
+├── docs/           # design notes, calibration, diagrams
+├── firmware/       # Arduino control code
+├── hardware/       # wiring, BOM, hardware-related files
+├── media/          # demo videos and images
+├── results/        # grasp logs, summaries, test outputs
+└── README.md
+```
+
+## How to Run
+
+1. connect the motors, servos, and buttons according to the wiring guide,
+2. upload the Arduino firmware to the Arduino controller,
+3. power the system and verify the initial open position,
+4. test pinch, wrap, and fine adjustment functions,
+5. tune the key parameters if necessary.
+
+For more details, see the calibration and hardware notes in `docs/`.
 
 ---
 
-## Safety Notes
+## Media
 
-- Start with low speeds (`kSpeedOpen/kSpeedClose`) and verify motion direction
-- Ensure `kPosMin/kPosMax` do not hit hard stops
-- PWM pulse bounds are clamped to `500~2500µs` for safety
-- Use **STOP (D20)** for emergency hold
-- Ensure common **GND** between Arduino and motor power
+Demo videos and images are available in the `media/` folder.
+
+Recommended demonstration content:
+
+- full system overview,
+- basic grasp sequence,
+- synchronized finger wrapping,
+- fine adjustment on a small object.
 
 ---
 
-## License
-- Code: Licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-- Hardware: Licensed under the [CERN Open Hardware License](https://www.ohwr.org/projects/cernohl).
+## Research Relevance
+
+This project reflects my interest in robotic manipulation, embedded control, and hardware-software integration. Through this work, I developed hands-on experience in designing a robotic control system, implementing embedded logic, tuning hardware behavior, and evaluating grasp performance.
+
+It also motivated me to further explore advanced research topics such as:
+
+- tactile feedback,
+- adaptive grasping,
+- closed-loop robotic manipulation,
+- embodied intelligence in robotic hands.
+
+---
+
+## Author
+
+Kaiyang Deng  
+Robotics Engineering, South China University of Technology  
+GitHub: KaiSANG121
