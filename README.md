@@ -19,7 +19,20 @@ The thumb and index finger are driven by **LV-TTL motors** to perform the primar
 
 ---
 
-## Demo
+## Project Highlights
+
+- **Pinch-first grasping strategy** for initial object capture
+- **Load-threshold stop logic** for safer and more stable contact
+- **Position-synchronized follower fingers** for coordinated wrapping
+- **Fine adjustment mode** for small-object grasping
+- **Low-latency button-based control** for reliable prototyping
+- **Integrated embedded control and robotic hardware implementation**
+
+---
+
+## Motivation
+
+Dexterous robotic grasping requires both precise initial contact and stable follow-up wrapping. In low-cost prototypes, simple open-loop control often leads to unstable grasps, delayed response, or poor performance on small targets.
 
 ![Dexterous hand precision grasping demo](media/gifs/demo.gif)
 
