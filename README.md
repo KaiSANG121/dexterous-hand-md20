@@ -6,7 +6,16 @@ This project presents a dexterous hand control system designed to improve grasp 
 
 The thumb and index finger are driven by **LV-TTL motors** to perform the primary pinch action, while the remaining three fingers are driven by **PWM servos** to provide follow-up wrapping support. To improve reliability and reduce latency during prototyping, a **button-based control interface** was adopted instead of Bluetooth communication.
 
-My main contributions include **control architecture design**, **Arduino firmware implementation**, **parameter tuning**, **hardware-software integration**, and **grasp performance testing**.
+---
+
+## Project Highlights
+
+- **Pinch-first grasping strategy** for initial object capture
+- **Load-threshold stop logic** for safer and more stable contact
+- **Position-synchronized follower fingers** for coordinated wrapping
+- **Fine adjustment mode** for small-object grasping
+- **Low-latency button-based control** for reliable prototyping
+- **Integrated embedded control and robotic hardware implementation**
 
 ---
 
@@ -25,6 +34,14 @@ My main contributions include **control architecture design**, **Arduino firmwar
 
 Dexterous robotic grasping requires both precise initial contact and stable follow-up wrapping. In low-cost prototypes, simple open-loop control often leads to unstable grasps, delayed response, or poor performance on small targets.
 
+![Dexterous hand precision grasping demo](media/gifs/demo.gif)
+
+---
+
+## Motivation
+
+Dexterous robotic grasping requires both precise initial contact and stable follow-up wrapping. In low-cost prototypes, simple open-loop control often leads to unstable grasps, delayed response, or poor performance on small targets.
+
 This project explores a lightweight and practical control solution that balances:
 
 1. **stable initial pinch contact**,
@@ -32,19 +49,6 @@ This project explores a lightweight and practical control solution that balances
 3. **limited fine adjustment for small or difficult objects**.
 
 The goal was not only to make the hand move, but to design a control strategy that is **interpretable**, **tunable**, and **effective in real hardware tests**.
-
----
-
-## My Contributions
-
-I was primarily responsible for the following aspects of the project:
-
-- designed the overall control architecture of the dexterous hand,
-- implemented the Arduino-based control firmware,
-- integrated LV-TTL motor control and PWM servo coordination,
-- designed the button-based interaction logic for grasp control,
-- tuned parameters such as motion limits, load thresholds, and fine adjustment step size,
-- conducted grasp testing and organized project documentation, videos, and results.
 
 ---
 
@@ -59,10 +63,10 @@ The system uses a **button-based interface** to trigger grasping, opening, and f
 
 ### Hardware Components
 
-- Arduino controller
-- 2 × LV-TTL motors
-- 3 × PWM servos
-- push buttons for user input
+- Arduino Mega2560 (or Mega2560 Pro)
+- 2 × LV-TTL motors (pinch fingers)
+- 3 × PWM servos (follower fingers)
+- push buttons for interaction
 - power supply and wiring interface
 
 ---
@@ -72,22 +76,18 @@ The system uses a **button-based interface** to trigger grasping, opening, and f
 The control logic consists of four main stages.
 
 ### 1. Open State
-
 The hand remains open and ready for a new grasp.
 
 ### 2. Pinch Phase
-
 The thumb and index finger move toward each other until contact is detected through a **load-threshold condition**.
 
 ### 3. Wrap Phase
-
 After pinch contact, the remaining three fingers move according to a **position-synchronized mapping strategy**, improving overall grasp stability.
 
 ### 4. Fine Adjustment Phase
-
 For small or difficult objects, an additional **fine adjustment step** is used to slightly refine finger position and improve grasp success.
 
-This staged strategy separates **initial capture** from **grasp stabilization**, making the system easier to tune and easier to analyze during testing.
+This staged strategy separates **initial capture** from **grasp stabilization**, making the system easier to tune and analyze during testing.
 
 ---
 
@@ -104,20 +104,21 @@ This reflects an important engineering trade-off:
 
 ## Wiring and Pin Map
 
-Please update this section according to your final hardware configuration.
+| Module | Connection | Firmware Pin / Interface |
+|---|---|---|
+| LV-TTL Motor 1 | Thumb / pinch finger | `Serial1` (TX1=18, RX1=19) |
+| LV-TTL Motor 2 | Index / pinch finger | `Serial2` (TX2=16, RX2=17) |
+| PWM Servo 1 | Follower finger 1 | D2 |
+| PWM Servo 2 | Follower finger 2 | D6 |
+| PWM Servo 3 | Follower finger 3 | D10 |
+| Button A (GRIP) | Grasp trigger | D42 |
+| Button B (OPEN) | Open / release | D40 |
+| Button C & D | Fine adjustment for thumb | D25 (IN), D27 (OUT) |
+| Button E & F | Fine adjustment for index | D29 (IN), D31 (OUT) |
+| Button G (STOP) | Emergency stop | D20 |
+| Button H (SYNC) | Synchronized follower fingers | D22 |
 
-| Module | Connection |
-|---|---|
-| LV-TTL Motor 1 | Thumb / pinch finger |
-| LV-TTL Motor 2 | Index / pinch finger |
-| PWM Servo 1 | Follower finger 1 |
-| PWM Servo 2 | Follower finger 2 |
-| PWM Servo 3 | Follower finger 3 |
-| Button A | Grasp trigger |
-| Button B | Open / release |
-| Button C | Fine adjustment |
-
-Detailed wiring notes can be found in the `hardware/` and `docs/` folders.
+For detailed wiring notes, see [`docs/wiring.md`](docs/wiring.md).
 
 ---
 
@@ -131,15 +132,24 @@ The system behavior is mainly affected by the following parameters:
 - **fine adjustment step size**
 - **initial open position calibration**
 
-These parameters were tuned empirically through repeated hardware testing to balance **grasp stability**, **responsiveness**, and **safe movement range**.
-
-See `docs/calibration.md` for calibration notes.
+A complete calibration and tuning guide is maintained in [`docs/calibration.md`](docs/calibration.md).
 
 ---
 
 ## Experimental Results
 
-The prototype was tested on objects of different sizes and grasping difficulty.
+The prototype was tested on objects of different sizes and manipulation tasks. A concise quantitative summary is shown below.
+
+### Quantitative Summary
+
+| Task | Trials | Success | Success Rate |
+|---|---:|---:|---:|
+| Ping-pong ball grasp | 30 | 30 | 100.0% |
+| Rubik's cube grasp | 30 | 30 | 100.0% |
+| Water bottle (half full) grasp | 30 | 26 | 86.7% |
+| Thumbtack grasp (fine adjust) | 30 | 11 | 36.7% |
+| Card pick & insertion | 50 | 46 | 92.0% |
+| Bottle cap loosening | 50 | 19 | 38.0% |
 
 ### Main Observations
 
@@ -148,30 +158,7 @@ The prototype was tested on objects of different sizes and grasping difficulty.
 - the fine adjustment mode improved grasp feasibility for small targets,
 - synchronized follower fingers improved wrapping support after the initial pinch.
 
-### Example Result Summary
-
-| Object Type | Grasp Mode | Result |
-|---|---|---|
-| Medium cylindrical object | Pinch + Sync | Stable grasp |
-| Large object | Pinch + Sync | Stable grasp |
-| Small object | Pinch + Sync + Fine Adjust | Partially successful |
-| Thin / difficult object | Pinch + Sync + Fine Adjust | Challenging |
-
-More detailed logs can be found in the `results/` folder.
-
----
-
-## Suggested Future Experimental Upgrade
-
-To strengthen this project as a research-oriented portfolio piece, future experiments can include:
-
-- **grasp success rate comparison** across object categories,
-- **ablation study**:
-  - pinch only,
-  - pinch + sync,
-  - pinch + sync + fine adjust,
-- **response time measurement** for contact stop and adjustment,
-- **failure case analysis** for small, thin, and low-friction objects.
+For full logs and notes, see [`results/grasp_tests.csv`](results/grasp_tests.csv) and [`results/grasp_summary.md`](results/grasp_summary.md).
 
 ---
 
@@ -186,10 +173,13 @@ While the current prototype demonstrates stable grasping for medium and large ob
 
 Possible future improvements include:
 
+- grasp success rate comparison across object categories,
+- ablation study (pinch only vs pinch + sync vs pinch + sync + fine adjust),
+- response time measurement for contact stop and adjustment,
+- failure case analysis for small, thin, and low-friction objects,
 - adding tactile or force sensing,
 - improving closed-loop coordination across all fingers,
-- introducing object-specific grasp planning,
-- comparing multiple control strategies through systematic experiments.
+- introducing object-specific grasp planning.
 
 ---
 
@@ -197,7 +187,7 @@ Possible future improvements include:
 
 ```text
 dexterous-hand-md20/
-├── docs/           # design notes, calibration, diagrams
+├── docs/           # design notes, calibration, wiring
 ├── firmware/       # Arduino control code
 ├── hardware/       # wiring, BOM, hardware-related files
 ├── media/          # demo videos and images
@@ -207,43 +197,31 @@ dexterous-hand-md20/
 
 ## How to Run
 
-1. connect the motors, servos, and buttons according to the wiring guide,
-2. upload the Arduino firmware to the Arduino controller,
-3. power the system and verify the initial open position,
-4. test pinch, wrap, and fine adjustment functions,
-5. tune the key parameters if necessary.
-
-For more details, see the calibration and hardware notes in `docs/`.
+1. Install **Arduino IDE** (recommended 2.x series, e.g. 2.3+).
+2. Install required dependency library:
+   - `Servo.h` (Arduino Servo library).
+3. Open firmware:
+   - `firmware/arduino/code/dexterous_hand_controller.ino`.
+4. Configure board and serial settings:
+   - Board: **Arduino Mega or Mega 2560**,
+   - Port: the COM/TTY port connected to your controller,
+   - Serial Monitor baud rate: **115200**.
+5. Connect motors, servos, and buttons according to [`docs/wiring.md`](docs/wiring.md).
+6. Upload firmware, power the system, verify initial open position, and test GRIP/OPEN/SYNC/FINE functions.
+7. Tune parameters following [`docs/calibration.md`](docs/calibration.md) if needed.
 
 ---
 
 ## Media
 
-Demo videos and images are available in the `media/` folder.
-
-Recommended demonstration content:
-
-- full system overview,
-- basic grasp sequence,
-- synchronized finger wrapping,
-- fine adjustment on a small object.
+- Demo GIF: [`media/gifs/demo.gif`](media/gifs/demo.gif)
+- Video list and top demonstrations: [`media/videos.md`](media/videos.md)
 
 ---
 
-## Research Relevance
+## About the Author
 
-This project reflects my interest in robotic manipulation, embedded control, and hardware-software integration. Through this work, I developed hands-on experience in designing a robotic control system, implementing embedded logic, tuning hardware behavior, and evaluating grasp performance.
-
-It also motivated me to further explore advanced research topics such as:
-
-- tactile feedback,
-- adaptive grasping,
-- closed-loop robotic manipulation,
-- embodied intelligence in robotic hands.
-
----
-
-## Author
+This project reflects my interest in robotic manipulation, embedded control, and hardware-software integration. I focused on control architecture, embedded implementation, hardware-software integration, and iterative grasp testing.
 
 Kaiyang Deng  
 Robotics Engineering, South China University of Technology  
