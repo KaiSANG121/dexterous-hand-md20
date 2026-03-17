@@ -21,7 +21,7 @@
 */
 
 // ==========================================================
-// ===== 1) Hardware config (pins, ports, calibration) ======
+// ==================== configuration ========================
 // ==========================================================
 
 // ---------- LV-TTL motors ----------
@@ -69,7 +69,7 @@ static const int kBtnFineInM2  = 29;
 static const int kBtnFineOutM2 = 31;
 
 // ==========================================================
-// ========== 2) Data structures / runtime states ===========
+// ================= hardware interface ======================
 // ==========================================================
 
 struct GripperMotor {
@@ -100,7 +100,7 @@ static bool lastFineInM2State  = HIGH;
 static bool lastFineOutM2State = HIGH;
 
 // ==========================================================
-// ========== 3) Gripper protocol (MD20 LV-TTL) ==============
+// ========= hardware interface: MD20 LV-TTL protocol =========
 // ==========================================================
 
 static uint8_t md20Checksum(uint8_t id, uint8_t len, uint8_t func,
@@ -188,7 +188,7 @@ static void md20StopAtCurrent(GripperMotor& m) {
 }
 
 // ==========================================================
-// ===== 4) High-level behaviors (Open/Grip/Stop/Sync) ======
+// ================== motion commands ========================
 // ==========================================================
 
 static void openGripper() {
@@ -211,6 +211,10 @@ static void startCloseGripper() {
   gGlobalClosing = true;
 }
 
+// ==========================================================
+// ================ safety / stop logic =====================
+// ==========================================================
+
 static void emergencyStopAll() {
   Serial.println(F("[GRIPPER] EMERGENCY STOP!"));
   for (uint8_t i = 0; i < kMotorCount; i++) {
@@ -220,6 +224,10 @@ static void emergencyStopAll() {
   }
   gGlobalClosing = false;
 }
+
+// ==========================================================
+// ===================== sync logic ==========================
+// ==========================================================
 
 // PWM follower: map Motor2 position ratio -> 3 PWM pulses
 static int clampInt(int v, int lo, int hi) {
@@ -260,7 +268,7 @@ static void pwmFollowMotor2() {
 }
 
 // ==========================================================
-// ========== 5) Fine adjustment (generic helper) ============
+// ================== fine adjustment ========================
 // ==========================================================
 
 static void fineAdjust(uint8_t motorIndex, bool inward) {
@@ -311,7 +319,7 @@ static void fineAdjustInMotor2()  { fineAdjust(1, true);  }
 static void fineAdjustOutMotor2() { fineAdjust(1, false); }
 
 // ==========================================================
-// ================ 6) Button handler (edge) =================
+// ================== motion commands: button handler =========
 // ==========================================================
 
 static void handleButtons() {
@@ -369,7 +377,22 @@ static void handleButtons() {
 }
 
 // ==========================================================
-// ================== 7) Arduino entry points ===============
+// ==================== serial debug =========================
+// ==========================================================
+
+static void printMotorTelemetry(uint8_t motorIndex, uint16_t pos, uint16_t load, uint8_t status) {
+  Serial.print(F("[M"));
+  Serial.print(motorIndex + 1);
+  Serial.print(F("] Pos="));
+  Serial.print(pos);
+  Serial.print(F(" Load="));
+  Serial.print(load);
+  Serial.print(F(" Status="));
+  Serial.println(status);
+}
+
+// ==========================================================
+// ================== Arduino entry points ===================
 // ==========================================================
 
 static void printPinMap() {
@@ -416,7 +439,7 @@ void loop() {
   // 1) Physical buttons
   handleButtons();
 
-  // 2) Serial command fallback
+  // 2) Serial debug command fallback
   if (Serial.available() > 0) {
     const char c = (char)Serial.read();
     if      (c == '1') openGripper();
@@ -425,7 +448,7 @@ void loop() {
     else if (c == '4') pwmFollowMotor2();
   }
 
-  // 3) LV-TTL monitoring & auto-stop logic
+  // 3) LV-TTL monitoring + safety / stop logic
   const uint32_t now = millis();
   if (now - gLastMonitorMs >= kMonitorIntervalMs) {
     gLastMonitorMs = now;
@@ -441,14 +464,7 @@ void loop() {
         motors[i].pos  = pos;
         motors[i].load = load;
 
-        Serial.print(F("[M"));
-        Serial.print(i + 1);
-        Serial.print(F("] Pos="));
-        Serial.print(pos);
-        Serial.print(F(" Load="));
-        Serial.print(load);
-        Serial.print(F(" Status="));
-        Serial.println(status);
+        printMotorTelemetry(i, pos, load, status);
 
         if (gGlobalClosing && motors[i].closing && !motors[i].contact) {
           if (load > kLoadThreshold) {

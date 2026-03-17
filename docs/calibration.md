@@ -1,6 +1,6 @@
 # Calibration Guide (MD20 LV-TTL + PWM follower fingers)
 
-This document explains how the key parameters in `firmware/arduino/code/code.ino` were calibrated.
+This document explains how the key parameters in `firmware/arduino/code/dexterous_hand_controller.ino` were calibrated.
 
 ## 1. Safety checklist (before calibration)
 - Use **low speed** first: `kSpeedOpen/kSpeedClose = 5~10`

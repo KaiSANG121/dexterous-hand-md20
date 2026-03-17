@@ -42,7 +42,7 @@ After a successful pinch, press **SYNC** to let the 3 PWM fingers **wrap and inc
 ## Quick Start (60 seconds)
 
 ### 1) Flash firmware
-1. Open `firmware/arduino/code/code.ino` with Arduino IDE
+1. Open `firmware/arduino/code/dexterous_hand_controller.ino` with Arduino IDE
 2. Select board: **Arduino Mega or Mega 2560**
 3. Upload
 4. (Optional) Open Serial Monitor @ **115200**
@@ -106,7 +106,7 @@ After a successful pinch, press **SYNC** to let the 3 PWM fingers **wrap and inc
 
 ## Key Parameters (What they mean & how to tune)
 
-These are defined at the top of `code.ino`.
+These are defined at the top of `dexterous_hand_controller.ino`.
 
 ### LV-TTL travel limits
 - `kPosMin = 80`, `kPosMax = 320`  
