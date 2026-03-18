@@ -54,6 +54,25 @@ The system uses a **button-based interface** to trigger grasping, opening, and f
 
 ---
 
+
+## From Concept to Prototype
+
+<table>
+  <tr>
+    <td align="center"><b>Concept Design</b></td>
+    <td align="center"><b>Physical Prototype</b></td>
+  </tr>
+  <tr>
+    <td><img src="media/images/hand_concept.jpg" width="100%"></td>
+    <td><img src="media/images/hand_back_view.jpg" width="100%"></td>
+  </tr>
+</table>
+
+This comparison shows the transition from the early structural concept to the implemented hardware prototype.  
+The final system preserves the overall back-side actuator layout and finger arrangement while adapting the design for practical assembly, wiring, and embedded control integration.
+
+---
+
 ## Control Strategy
 
 The control logic consists of four main stages.
