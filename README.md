@@ -63,7 +63,7 @@ The system uses a **button-based interface** to trigger grasping, opening, and f
     <td align="center"><b>Physical Prototype</b></td>
   </tr>
   <tr>
-    <td><img src="media/images/hand_concept.jpg" width="80%"></td>
+    <td><img src="media/images/hand_concept.jpg" width="100%"></td>
     <td><img src="media/images/hand_back_view.JPG" width="80%"></td>
   </tr>
 </table>
